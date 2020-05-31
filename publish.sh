@@ -1,15 +1,15 @@
 #!/bin/bash -eu
 
-# Publish any versions of the docker image not yet pushed to ${JENKINS_REPO}
+# Publish any versions of the docker image not yet pushed to jenkins/jenkins
 # Arguments:
 #   -n dry run, do not build or publish images
 #   -d debug
 
-set -o pipefail
+set -eou pipefail
 
 . jenkins-support
 
-: "${DOCKERHUB_ORGANISATION:=jenkins}"
+: "${DOCKERHUB_ORGANISATION:=codenest}"
 : "${DOCKERHUB_REPO:=jenkins}"
 
 JENKINS_REPO="${DOCKERHUB_ORGANISATION}/${DOCKERHUB_REPO}"
@@ -20,7 +20,7 @@ Docker repository in Use:
 EOF
 
 sort-versions() {
-    if [ "$(uname)" == 'Darwin' ]; then
+  if [ "$(uname)" == 'Darwin' ]; then
         gsort --version-sort
     else
         sort --version-sort
@@ -84,7 +84,7 @@ get-digest() {
 }
 
 get-latest-versions() {
-    curl -q -fsSL https://repo.jenkins-ci.org/releases/org/jenkins-ci/main/jenkins-war/maven-metadata.xml | grep '<version>.*</version>' | grep -E -o '[0-9]+(\.[0-9]+)+' | sort-versions | uniq | tail -n 30
+  curl -q -fsSL https://repo.jenkins-ci.org/releases/org/jenkins-ci/main/jenkins-war/maven-metadata.xml | grep '<version>.*</version>' | grep -E -o '[0-9]+(\.[0-9]+)+' | sort-versions | uniq | tail -n 20
 }
 
 publish() {
@@ -100,7 +100,12 @@ publish() {
 
     sha=$(curl -q -fsSL "https://repo.jenkins-ci.org/releases/org/jenkins-ci/main/jenkins-war/${version}/jenkins-war-${version}.war.sha256" )
 
-    docker build --file "Dockerfile$variant" \
+    FILE="Dockerfile"
+    if [[ $variant =~ slim ]]; then
+        FILE="Dockerfile$variant"
+    fi
+
+    docker build --file "$FILE" \
                  --build-arg "JENKINS_VERSION=$version" \
                  --build-arg "JENKINS_SHA=$sha" \
                  --tag "${JENKINS_REPO}:${tag}" \
@@ -212,6 +217,7 @@ TOKEN=$(login-token)
 
 lts_version=""
 version=""
+
 for version in $(get-latest-versions); do
     if is-published "$version$variant"; then
         echo "Tag is already published: $version$variant"
