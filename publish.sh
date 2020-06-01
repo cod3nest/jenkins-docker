@@ -84,7 +84,7 @@ get-digest() {
 }
 
 get-latest-versions() {
-  curl -q -fsSL https://repo.jenkins-ci.org/releases/org/jenkins-ci/main/jenkins-war/maven-metadata.xml | grep '<version>.*</version>' | grep -E -o '[0-9]+(\.[0-9]+)+' | sort-versions | uniq | tail -n 20
+  curl -q -fsSL https://repo.jenkins-ci.org/releases/org/jenkins-ci/main/jenkins-war/maven-metadata.xml | grep '<version>.*</version>' | grep -E -o '[0-9]+(\.[0-9]+)+' | sort-versions | uniq | tail -n 10
 }
 
 publish() {
@@ -105,7 +105,8 @@ publish() {
         FILE="Dockerfile$variant"
     fi
 
-    docker build --file "$FILE" \
+    docker buildx build --file "$FILE" \
+                 --platform linux/arm64 \
                  --build-arg "JENKINS_VERSION=$version" \
                  --build-arg "JENKINS_SHA=$sha" \
                  --tag "${JENKINS_REPO}:${tag}" \
