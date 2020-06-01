@@ -27,3 +27,4 @@ jobs:
       - name: Run Buildx
         run: |
           make all
+          make publish
