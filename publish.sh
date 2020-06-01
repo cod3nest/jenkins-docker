@@ -107,6 +107,7 @@ publish() {
 
     docker buildx build --file "$FILE" \
                  --platform linux/arm64 \
+                 --load \
                  --build-arg "JENKINS_VERSION=$version" \
                  --build-arg "JENKINS_SHA=$sha" \
                  --tag "${JENKINS_REPO}:${tag}" \
