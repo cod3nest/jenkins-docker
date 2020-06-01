@@ -5,10 +5,10 @@ all: shellcheck build #test
 build: build-arm build-slim
 
 build-arm:
-	docker buildx build --platform linux/arm64 .
+	docker buildx build --platform linux/arm64 --load .
 
 build-slim:
-	docker buildx build --platform linux/arm64 --file Dockerfile-slim .
+	docker buildx build --platform linux/arm64 --load --file Dockerfile-slim .
 
 bats:
 	# Latest tag is unfortunately 0.4.0 which is quite older than the latest master tip.
