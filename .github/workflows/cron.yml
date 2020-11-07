@@ -11,11 +11,12 @@ jobs:
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v2
+        uses: docker/setup-buildx-action@v1
         with:
           buildx-version: latest
           skip-cache: false
           qemu-version: latest
+
 
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
